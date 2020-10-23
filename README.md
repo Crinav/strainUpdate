@@ -20,6 +20,6 @@ Copyright (©) Christophe Navarro <navarro.christophe@gmail.com>
 
 ## Screenshots
   
-![alt text](https://github.com/Crinav/strainUpdate/blob/master/SU1.png "main page")  
+![alt text](https://github.com/Crinav/strainUpdate/blob/main/SU1.png "main page")  
 ___  
 
