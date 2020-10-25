@@ -1,0 +1,19 @@
+#USAGE
+The script need a file xlsx with first sheet named "strain-1"
+
+With the corresponding columns :
+    name : 46 (AT)
+    Temperature optimum to growth : 58 (BF)
+    Isolated from: 37 (AK)
+    literature : 79 (CA)
+    date of isolation: 36 (AJ)
+    geographic origin: 33 (AG)
+    medium : 61 (BI)
+    application : 78 (BZ)
+    patent : 80 (CB)
+
+The script work on a copy of your xlsx file , in a folder named "WorkInProgress" created in location of xlsx file. 
+
+The new file will rename [yourxlsxfile]Updated.[date].xslx
+
+Ff some datas already exist in cells, they are updated. 

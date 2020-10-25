@@ -1,6 +1,6 @@
 from cx_Freeze import setup, Executable  
 import os.path
-import sys
+
 #Permet d'éviter une erreur de type "KeyError: TCL_LIBRARY"
 PYTHON_INSTALL_DIR = os.path.dirname(os.path.dirname(os.__file__)) 
 os.environ['TCL_LIBRARY'] = os.path.join(PYTHON_INSTALL_DIR, 'tcl', 'tcl8.6') 
@@ -14,12 +14,12 @@ executables = [
         Executable(script = "strainUpdate.py",copyright= "Copyright © 2020 Christophe.navarro", icon = "fungi.ico", base = base )
 ]
 buildOptions = dict( 
-        includes = ["json","openpyxl", "requests", "scrapy", "lxml", "xlrd"],
-        include_files = ["fungi.ico", "fungi.bmp", "fungi2.bmp"] 
+        includes = ["datetime","openpyxl", "requests", "scrapy", "lxml", "xlrd","re", "os", ],
+        include_files = ["fungi.ico", "LICENSE.txt", "README.txt", "user.txt"] 
 )
  
 setup(  name = "strainUpdate",
-        version = "0.1" , 
+        version = "1.0" , 
         description = "Scraping site Global Catalog of MicroOrganism " , 
         options = dict(build_exe = buildOptions), 
         executables = executables)

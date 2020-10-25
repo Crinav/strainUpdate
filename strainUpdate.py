@@ -5,34 +5,31 @@ from lxml import html
 from openpyxl.styles import Alignment
 from datetime import date 
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-# Recup le path du fichier d'origine    
-pathInput = str(input(f"{bcolors.OKBLUE}Please type a path to your xlsx file (e.g. C:\\path\\to\\my\\file\\name.xlsx)\n{bcolors.ENDC}"))
-if not os.path.isfile(pathInput):
-    print(f"{bcolors.FAIL}File doesn't exist on drive{bcolors.ENDC}")
-    exit()
+pathInput = ''
+# Recup le path du fichier d'origine 
+while True:
+    try:
+        pathInput = input("Please enter path to your xlsx file (e.g. C:\\path\\to\\my\\file\\name.xlsx)\n").strip()
+
+        if os.path.isfile(pathInput):
+            break       
+        else:
+            print("File doesn't exist on drive")
+    except ValueError:
+        print("File doesn't exist on drive")
 # Le dossier du fichier d'origine
 pathBase = os.path.dirname(pathInput)
 # le nom du fichier d'origine sans extension
 head, tail = os.path.split(pathInput)
 fileInput = tail.replace('.xlsx', '')
 
-print(f"{bcolors.OKGREEN}the script could be effective in several minutes ! Be patient !!! ;){bcolors.ENDC}")
+print("the script could be effective in several minutes ! Be patient !!! ;)")
 #création d'un répertoire de travail s'il n'existe pas déjà
 if not os.path.exists(pathBase+'/WorkInProgress'):
     os.makedirs(pathBase+'/WorkInProgress')
     # Date du jour
 today = date.today()
-tempfile =  fileInput+str(today)+".xlsx"
+tempfile =  fileInput+'Updated.'+str(today)+".xlsx"
 rowToChange = 0
 
 
@@ -45,14 +42,14 @@ try:
     del wb
     wb = load_workbook(pathInput)
 except:
-    print(f"{bcolors.FAIL}Unable to open file, please copy one in install directory{bcolors.ENDC}")
-    exit()
+    print("Unable to open sheet, please verify first sheet's name is 'strain-1'")
+    
 # On enregistre une copie du fichier pour travailler dessus
 try:
    wb.save(pathBase+"/WorkInProgress/"+tempfile) 
 except:
-    print(f"{bcolors.FAIL}Unable to save {tempfile} {bcolors.ENDC}")
-    exit()
+    print(f"Unable to save {tempfile} ")
+    
 wb.close()
 
 # fonction qui concatène les string d'une list
@@ -69,97 +66,98 @@ def readExcel(sheet, obj, wb, ws):
     try:
         mytimeout = (5, 8)
         response = requests.get(url, timeout = mytimeout)
-    except:
-        print(f"{bcolors.FAIL}Something went wrong with internet connection...{bcolors.ENDC}") 
-        exit()
-    # Si la requete s'est bien passee
-    if response.status_code == 200 :
-        response.close()
-        # Parsing de la reponse
-        root = html.fromstring(response.content)
+        # Si la requete s'est bien passee
+        if response.status_code == 200 :
+            response.close()
+            # Parsing de la reponse
+            root = html.fromstring(response.content)
 
-        # strain = root.xpath('/html/body/div[4]/div[1]/table/tbody/tr/td[contains(., "Strain Number:")]/following-sibling::td/text()')
-        # if strain:
-        #     result["strain"] = strain[0].strip()
+            # strain = root.xpath('/html/body/div[4]/div[1]/table/tbody/tr/td[contains(., "Strain Number:")]/following-sibling::td/text()')
+            # if strain:
+            #     result["strain"] = strain[0].strip()
 
-        name =  root.xpath('/html/body/div[4]/div[1]/table/tbody/tr[2]/td[2]/a/strong/i/text()') 
-        if name:
-            result["name"] = name[0].strip()
+            name =  root.xpath('/html/body/div[4]/div[1]/table/tbody/tr[2]/td[2]/a/strong/i/text()') 
+            if name:
+                result["name"] = name[0].strip()
 
-        isolated = root.xpath('/html/body/div[4]/div[1]/table/tbody/tr/td[contains(., "Isolated From:")]/following-sibling::td/text()')   
-        if isolated:
-            result["isolated"] = isolated[0].strip()
-            
-        # literature = root.xpath('/html/body/div[4]/div[1]/table/tbody/tr/td[contains(., "Literature:")]/following-sibling::td/text()')   
-        # if literature:
-        #     result["literature"] = literature[0].strip()
+            isolated = root.xpath('/html/body/div[4]/div[1]/table/tbody/tr/td[contains(., "Isolated From:")]/following-sibling::td/text()')   
+            if isolated:
+                result["isolated"] = isolated[0].strip()
+                
+            # literature = root.xpath('/html/body/div[4]/div[1]/table/tbody/tr/td[contains(., "Literature:")]/following-sibling::td/text()')   
+            # if literature:
+            #     result["literature"] = literature[0].strip()
 
-        geo = root.xpath('/html/body/div[4]/div[1]/table/tbody/tr/td[contains(., "Geographic Origin:")]/following-sibling::td/text() ')
-        if geo:
-            result["geo"] = geo[0].strip()
+            geo = root.xpath('/html/body/div[4]/div[1]/table/tbody/tr/td[contains(., "Geographic Origin:")]/following-sibling::td/text() ')
+            if geo:
+                result["geo"] = geo[0].strip()
 
-        medium = root.xpath('/html/body/div[4]/div[1]/table/tbody/tr/td[contains(., "Medium Name:")]/following-sibling::td/text()') 
-        if medium:
-            result["medium"] = medium[0].strip()
+            medium = root.xpath('/html/body/div[4]/div[1]/table/tbody/tr/td[contains(., "Medium Name:")]/following-sibling::td/text()') 
+            if medium:
+                result["medium"] = medium[0].strip()
 
-        temp = root.xpath('/html/body/div[4]/div[1]/table/tbody/tr/td[contains(., "Optimum Temperature For Growth:")]/following-sibling::td/text()') 
-        if temp:
-            result["temp"] = temp[0].strip()
+            temp = root.xpath('/html/body/div[4]/div[1]/table/tbody/tr/td[contains(., "Optimum Temperature For Growth:")]/following-sibling::td/text()') 
+            if temp:
+                result["temp"] = temp[0].strip()
 
-        date = root.xpath('/html/body/div[4]/div[1]/table/tbody/tr/td[contains(., "Date of Isolation:")]/following-sibling::td/text()') 
-        if date:
-            result["date"] = date[0].strip()
+            date = root.xpath('/html/body/div[4]/div[1]/table/tbody/tr/td[contains(., "Date of Isolation:")]/following-sibling::td/text()') 
+            if date:
+                result["date"] = date[0].strip()
 
-        app = root.xpath('/html/body/div[4]/div[1]/table/tbody/tr/td[contains(., "Application:")]/following-sibling::td/text()') 
-        if app:
-            result["app"] = app[0].strip()
+            app = root.xpath('/html/body/div[4]/div[1]/table/tbody/tr/td[contains(., "Application:")]/following-sibling::td/text()') 
+            if app:
+                result["app"] = app[0].strip()
 
-        table = root.xpath('/html/body/div[4]/table[2]/tr/td[@class="ve16t"]/text()')
-        if table:
-            publi = root.xpath('//*[@id="mainI"]/table[@class="ve16"]/tr/td[@class="ve16t" and contains(.,"Publications")]/../../following-sibling::table[@id="bacteria_static"][1]/tbody/tr/td/table//child::td/a/text()')
-            if publi:
-                # Recup des link
-                publiLink = root.xpath('//*[@id="mainI"]/table[@class="ve16"]/tr/td[@class="ve16t" and contains(.,"Publications")]/../../following-sibling::table[@id="bacteria_static"][1]/tbody/tr/td/table//child::td/a/@href')
-                i=0
-                j=1
-                # Nettoyage et ajencement des resultats
-                for val in publiLink:
-                    publiLink[i]={"name":publi[j-1]+' '+publi[j].replace('\xa0', ' '),"href":val}
-                    i+=1
-                    j+=2
-                result["publications"] = publiLink
-               
-            nodepatent = root.xpath('//*[@id="mainI"]/table[@class="ve16"]/tr/td[@class="ve16t" and contains(.,"Patents")]/../../following-sibling::table[@id="bacteria_static"][1]/tbody/tr/td/table//following-sibling::tr/self::node()')
-            patentLink = root.xpath('//*[@id="mainI"]/table[@class="ve16"]/tr/td[@class="ve16t" and contains(.,"Patents")]/../../following-sibling::table[@id="bacteria_static"][1]/tbody/tr/td/table/descendant::td/a/@href')
-            j=0
-            patentString =[]            
-            for node in nodepatent:
-                lst = node.xpath('*//text()')
-                #efface le dernier node
-                if node == nodepatent[len(nodepatent)-1]:
-                    del nodepatent[len(nodepatent)-1]
-                    break 
-                # Supprime des chiffres superflus
-                if 'PatentNo' in lst:
-                    j+=1
-                    lst.remove(str(j)) 
-                # Rectifie certaines valeurs manquantes            
-                if len(lst) == 2:
-                    patentString.append(concate_list(lst)+'N/A\n')
-                # Enregistrement normal
-                elif len(lst) == 3:
-                    patentString.append(concate_list(lst)+'\n')           
-            result['patent']= patentString
-            result["patentLink"] = patentLink
-        if bool(result):
-            print(f"{bcolors.WARNING}Writing result for {obj['ref']}{bcolors.ENDC}")
-            # Ecriture des cells
-            writeCell(obj['row'], result, wb, ws)
+            table = root.xpath('/html/body/div[4]/table[2]/tr/td[@class="ve16t"]/text()')
+            if table:
+                publi = root.xpath('//*[@id="mainI"]/table[@class="ve16"]/tr/td[@class="ve16t" and contains(.,"Publications")]/../../following-sibling::table[@id="bacteria_static"][1]/tbody/tr/td/table//child::td/a/text()')
+                if publi:
+                    # Recup des link
+                    publiLink = root.xpath('//*[@id="mainI"]/table[@class="ve16"]/tr/td[@class="ve16t" and contains(.,"Publications")]/../../following-sibling::table[@id="bacteria_static"][1]/tbody/tr/td/table//child::td/a/@href')
+                    i=0
+                    j=1
+                    # Nettoyage et ajencement des resultats
+                    for val in publiLink:
+                        publiLink[i]={"name":publi[j-1]+' '+publi[j].replace('\xa0', ' '),"href":val}
+                        i+=1
+                        j+=2
+                    result["publications"] = publiLink
+                
+                nodepatent = root.xpath('//*[@id="mainI"]/table[@class="ve16"]/tr/td[@class="ve16t" and contains(.,"Patents")]/../../following-sibling::table[@id="bacteria_static"][1]/tbody/tr/td/table//following-sibling::tr/self::node()')
+                patentLink = root.xpath('//*[@id="mainI"]/table[@class="ve16"]/tr/td[@class="ve16t" and contains(.,"Patents")]/../../following-sibling::table[@id="bacteria_static"][1]/tbody/tr/td/table/descendant::td/a/@href')
+                j=0
+                patentString =[]            
+                for node in nodepatent:
+                    lst = node.xpath('*//text()')
+                    #efface le dernier node
+                    if node == nodepatent[len(nodepatent)-1]:
+                        del nodepatent[len(nodepatent)-1]
+                        break 
+                    # Supprime des chiffres superflus
+                    if 'PatentNo' in lst:
+                        j+=1
+                        lst.remove(str(j)) 
+                    # Rectifie certaines valeurs manquantes            
+                    if len(lst) == 2:
+                        patentString.append(concate_list(lst)+'N/A\n')
+                    # Enregistrement normal
+                    elif len(lst) == 3:
+                        patentString.append(concate_list(lst)+'\n')           
+                result['patent']= patentString
+                result["patentLink"] = patentLink
+            if bool(result):
+                print(f"Writing result for {obj['ref']}")
+                # Ecriture des cells
+                writeCell(obj['row'], result, wb, ws)
+            else:
+                print(f"No result for {obj['ref']}")
         else:
-            print('No result for', obj['ref'])
-    else:
-        print(f"{bcolors.FAIL}Something went wrong with Global Catalog of Microorganisms...{bcolors.ENDC}") 
-        exit()               
+            print("Something went wrong with Global Catalog of Microorganisms...") 
+    except:
+        print("Something went wrong with internet connection...") 
+        
+    
+                     
             
 def writeCell(rowToChange, result, wb, ws):
     # Enregistrement des valeurs dans les cellules
@@ -243,7 +241,7 @@ def checkNumbers():
     i=0
     for val in arrayRef:
         i+=1
-        print('Working on ...', val['ref'], '(',i,'/',len(arrayRef),'strains)')
+        print(f"Working on ... {val['ref']} ({i}/{len(arrayRef)} strains)")
         readExcel(sheet, val, wb, ws)
     
 checkNumbers()
